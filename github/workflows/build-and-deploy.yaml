@@ -6,6 +6,21 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
+  GAR_LOCATION: us-central1 
+  GKE_CLUSTER: my-gke-cluster
+  GKE_ZONE: us-central1-a
+  DEPLOYMENT_NAME_CLIENT: gke-client
+  DEPLOYMENT_NAME_SERVER:  gke-server
+  REPOSITORY: samples
+  IMAGE_CLIENT: client
+  IMAGE_SERVER: server
+  CLIENT: ./client
+  SERVER: ./server
+  SITE_HOSTNAME: localhost
+
+
 jobs:
   create-image-and-push-to-dockerhub:
   
@@ -31,7 +46,8 @@ jobs:
           context: ./api
           file: ./api/Dockerfile
           push: true
-          tags: niranjang2/book-management-api:${{ github.sha }}
+          tags: 9016/book-management-api:${{ github.sha }}
+          # tags: $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/server:$GITHUB_SHA
       
       - name: Build and push App image
         uses: docker/build-push-action@v4
@@ -39,7 +55,8 @@ jobs:
           context: ./app
           file: ./app/Dockerfile
           push: true
-          tags: niranjang2/book-management-app:${{ github.sha }}
+          tags: 9016/book-management-app:${{ github.sha }}
+          # tags: $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/client:$GITHUB_SHA
           build-args: REACT_APP_BASE_URL=${{ secrets.REACT_APP_BASE_URL }}
   
   setup-and-deploy:
@@ -56,16 +73,28 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
-      with:
-        credentials_json: ${{ secrets.GKE_SA }}
+    # - name: Authenticate to Google Cloud
+    #   uses: google-github-actions/auth@v1
+    #   with:
+    #     credentials_json: ${{ secrets.GKE_SA }}
 
-    - name: Get GKE Credentials
-      uses: google-github-actions/get-gke-credentials@v1
+    - id: 'auth'
+      name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v2'
       with:
-        cluster_name: ${{ secrets.GKE_CLUSTER_NAME }}
-        location: ${{ secrets.GKE_CLUSTER_ZONE }}
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+    - name: Set up GKE credentials
+      uses: google-github-actions/get-gke-credentials@v2
+      with:
+        cluster_name: ${{ env.GKE_CLUSTER }}
+        location: ${{ env.GKE_ZONE }}
+
+    # - name: Get GKE Credentials
+    #   uses: google-github-actions/get-gke-credentials@v1
+    #   with:
+    #     cluster_name: ${{ secrets.GKE_CLUSTER_NAME }}
+    #     location: ${{ secrets.GKE_CLUSTER_ZONE }}
 
     - name: Deploy API on the GKE
       run: |-
