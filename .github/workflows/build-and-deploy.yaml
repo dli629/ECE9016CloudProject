@@ -10,7 +10,7 @@ env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
   GAR_LOCATION: us-central1 
   GKE_CLUSTER: my-gke-cluster
-  GKE_ZONE: us-central1-b
+  GKE_ZONE: us-central1
   DEPLOYMENT_NAME_CLIENT: gke-client
   DEPLOYMENT_NAME_SERVER:  gke-server
   REPOSITORY: samples
