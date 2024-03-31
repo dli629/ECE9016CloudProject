@@ -98,6 +98,10 @@ jobs:
       
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
+    
+    # Docker auth configuration
+    - name: Docker auth configuration
+      run: gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://${{env.GAR_LOCATION}}-docker.pkg.dev
 
     - name: Build and push API image to GAR
       uses: docker/build-push-action@v4
