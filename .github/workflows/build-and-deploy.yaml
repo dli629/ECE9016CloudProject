@@ -134,11 +134,12 @@ jobs:
 
     - name: List services
       run: kubectl get services -n development
-      
+
     - name: Get API URL
       id: get-api-url
       run: |
-        kubectl wait --for=condition=available --timeout=300s -n development deployment/book-mgmt-api-deploy
+        # kubectl wait --for=condition=available --timeout=300s -n development deployment/book-mgmt-api-deploy
+        sleep 300
         # get URL
         API_URL=$(kubectl get service book-mgmt-api-service -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
         echo "::set-output name=api_url::$API_URL"
