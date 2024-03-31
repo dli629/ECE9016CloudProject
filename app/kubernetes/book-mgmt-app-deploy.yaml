@@ -7,7 +7,7 @@ metadata:
     app: book-management
   namespace: development
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       name: book-mgmt-app-pod
@@ -24,3 +24,11 @@ spec:
           image: APP_DOCKER_IMG_TAG
           ports:
             - containerPort: 80
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app: book-management
+                name: book-mgmt-api-pod
+            topologyKey: "kubernetes.io/hostname"
