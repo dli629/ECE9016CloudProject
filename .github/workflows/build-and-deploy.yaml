@@ -131,7 +131,7 @@ jobs:
       run: |-
         # sed -i -e 's/DOCKER_IMG_TAG/'${{ github.sha }}'/' ./api/kubernetes/book-mgmt-api-deploy.yaml
         # kustomize edit set image book-management-api=$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_SERVER:${{github.sha}}
-        sed -i -e 's|book-management-api|${GAR_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_SERVER}:${GITHUB_SHA}|g" ./api/kubernetes/book-mgmt-api-deploy.yaml
+        sed -i -e "s|book-management-api|${GAR_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_SERVER}:${GITHUB_SHA}|g" ./api/kubernetes/book-mgmt-api-deploy.yaml
         kubectl apply -f ./api/kubernetes/
       env:
         GAR_LOCATION: ${{ env.GAR_LOCATION }}
@@ -144,7 +144,7 @@ jobs:
       run: |-
         # sed -i -e 's/DOCKER_IMG_TAG/'${{ github.sha }}'/' ./app/kubernetes/book-mgmt-app-deploy.yaml
         # kustomize edit set image book-management-app=$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_CLIENT:${{github.sha}}
-        sed -i -e 's|book-management-app|${GAR_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_CLIENT}:${GITHUB_SHA}|g" ./app/kubernetes/book-mgmt-app-deploy.yaml
+        sed -i -e "s|book-management-app|${GAR_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_CLIENT}:${GITHUB_SHA}|g" ./app/kubernetes/book-mgmt-app-deploy.yaml
         kubectl apply -f ./app/kubernetes/
       env:
         GAR_LOCATION: ${{ env.GAR_LOCATION }}
