@@ -60,7 +60,7 @@ jobs:
   #         build-args: REACT_APP_BASE_URL=${{ secrets.REACT_APP_BASE_URL }}
   
   setup-build-and-deploy:
-    needs: [create-image-and-push-to-dockerhub]
+    # needs: [create-image-and-push-to-dockerhub]
 
     name: Setup and Deploy
     runs-on: ubuntu-latest
