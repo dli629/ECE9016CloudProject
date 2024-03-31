@@ -131,7 +131,10 @@ jobs:
         REPOSITORY: ${{ env.REPOSITORY }}
         IMAGE_CLIENT: ${{ env.IMAGE_CLIENT }}
         GITHUB_SHA: ${{ github.sha }}
-    
+
+    - name: List services
+      run: kubectl get services -n development
+      
     - name: Get API URL
       id: get-api-url
       run: |
