@@ -21,6 +21,6 @@ spec:
     spec:
       containers:
         - name: book-management-app-image
-          image: 9016/book-management-app:DOCKER_IMG_TAG
+          image: book-management-app
           ports:
             - containerPort: 80
