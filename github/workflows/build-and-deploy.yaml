@@ -25,13 +25,22 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Build and push
+      - name: Build and push API image
         uses: docker/build-push-action@v4
         with:
           context: ./api
           file: ./api/Dockerfile
           push: true
           tags: niranjang2/book-management-api:${{ github.sha }}
+      
+      - name: Build and push App image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./app
+          file: ./app/Dockerfile
+          push: true
+          tags: niranjang2/book-management-app:${{ github.sha }}
+          build-args: REACT_APP_BASE_URL=${{ secrets.REACT_APP_BASE_URL }}
   
   setup-and-deploy:
     needs: [create-image-and-push-to-dockerhub]
@@ -58,7 +67,12 @@ jobs:
         cluster_name: ${{ secrets.GKE_CLUSTER_NAME }}
         location: ${{ secrets.GKE_CLUSTER_ZONE }}
 
-    - name: Deploy on the GKE
+    - name: Deploy API on the GKE
       run: |-
         sed -i -e 's/DOCKER_IMG_TAG/'${{ github.sha }}'/' ./api/kubernetes/book-mgmt-api-deploy.yaml
         kubectl apply -f ./api/kubernetes/
+    
+    - name: Deploy App on GKE
+      run: |-
+        sed -i -e 's/DOCKER_IMG_TAG/'${{ github.sha }}'/' ./app/kubernetes/book-mgmt-app-deploy.yaml
+        kubectl apply -f ./app/kubernetes/
