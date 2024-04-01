@@ -8,7 +8,7 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT_PRD }}
-  GAR_LOCATION: us-central1-f
+  GAR_LOCATION: us-central1
   GKE_CLUSTER: my-gke-cluster
   GKE_ZONE: us-central1-f
   DEPLOYMENT_NAME_CLIENT: gke-client
