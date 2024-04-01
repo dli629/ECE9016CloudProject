@@ -5,7 +5,7 @@ metadata:
   labels:
     name: mysql-service
     app: mysql-gke-deployment
-  namespace: development
+  namespace: production
 spec:
   type: ClusterIP
   selector:
