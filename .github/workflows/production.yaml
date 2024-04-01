@@ -8,9 +8,9 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT_PRD }}
-  GAR_LOCATION: us-central1 
+  GAR_LOCATION: us-central1-f
   GKE_CLUSTER: my-gke-cluster
-  GKE_ZONE: us-central1
+  GKE_ZONE: us-central1-f
   DEPLOYMENT_NAME_CLIENT: gke-client
   DEPLOYMENT_NAME_SERVER: gke-server
   REPOSITORY: samples
