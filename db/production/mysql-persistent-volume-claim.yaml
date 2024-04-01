@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-data-store
+  labels:
+    name: mysql-data-store
+    app: mysql-gke-deployment
+  namespace: development
+spec:
+  resources:
+    requests:
+      storage: 1Gi
+    limits:
+      storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard-rwo
