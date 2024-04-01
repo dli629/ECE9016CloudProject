@@ -54,6 +54,8 @@ spec:
                   app: book-management
                   component: app
               topologyKey: "kubernetes.io/hostname"
+
+              
         # podAffinity:
         #   preferredDuringSchedulingIgnoredDuringExecution:
         #   - labelSelector:

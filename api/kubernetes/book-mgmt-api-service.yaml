@@ -9,8 +9,9 @@ metadata:
 spec:
   type: LoadBalancer
   selector:
-    name: book-mgmt-api-pod
+    # name: book-mgmt-api-pod
     app: book-management
+    component: api
   ports:
     - name: http
       port: 5000
