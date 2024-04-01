@@ -2,15 +2,15 @@ name: Docker build and Deploy
 
 on:
   push:
-    branches: [main]
+    branches: [dev]
   pull_request:
-    branches: [main]
+    branches: [dev]
 
 env:
-  PROJECT_ID: ${{ secrets.GKE_PROJECT_PRD }}
+  PROJECT_ID: ${{ secrets.GKE_PROJECT }}  
   GAR_LOCATION: us-central1 
-  GKE_CLUSTER: my-gke-cluster
-  GKE_ZONE: us-central1
+  GKE_CLUSTER: my-gke-cluster-dev # -dev
+  GKE_ZONE: us-central1-a # -a
   DEPLOYMENT_NAME_CLIENT: gke-client
   DEPLOYMENT_NAME_SERVER: gke-server
   REPOSITORY: samples
@@ -88,7 +88,7 @@ jobs:
       name: 'Authenticate to Google Cloud'
       uses: 'google-github-actions/auth@v2'
       with:
-          credentials_json: '${{ secrets.GCP_CREDENTIALS_PRD }}'
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
 
     - name: Set up GKE credentials
       uses: google-github-actions/get-gke-credentials@v2
@@ -120,10 +120,10 @@ jobs:
 
     - name: Deploy API on the GKE
       run: |-
-        # sed -i -e 's/DOCKER_IMG_TAG/'${{ github.sha }}'/' ./api/kubernetes/production/book-mgmt-api-deploy.yaml
+        # sed -i -e 's/DOCKER_IMG_TAG/'${{ github.sha }}'/' ./api/kubernetes/development/book-mgmt-api-deploy.yaml
         # kustomize edit set image API_DOCKER_IMG_TAG=$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_SERVER:${{github.sha}}
-        sed -i -e "s|API_DOCKER_IMG_TAG|${GAR_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_SERVER}:${GITHUB_SHA}|g" ./api/kubernetes/production/book-mgmt-api-deploy.yaml
-        kubectl apply -f ./api/kubernetes/production/
+        sed -i -e "s|API_DOCKER_IMG_TAG|${GAR_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_SERVER}:${GITHUB_SHA}|g" ./api/kubernetes/development/book-mgmt-api-deploy.yaml
+        kubectl apply -f ./api/kubernetes/development/
         echo "API deployment initiated"
       env:
         GAR_LOCATION: ${{ env.GAR_LOCATION }}
@@ -133,15 +133,15 @@ jobs:
         GITHUB_SHA: ${{ github.sha }}
 
     - name: List services
-      run: kubectl get services -n production
+      run: kubectl get services -n development
 
     - name: Get API URL
       id: get-api-url
       run: |
-        # kubectl wait --for=condition=available --timeout=300s -n production deployment/book-mgmt-api-deploy
+        # kubectl wait --for=condition=available --timeout=300s -n development deployment/book-mgmt-api-deploy
         sleep 300
         # get URL
-        API_URL=$(kubectl get service book-mgmt-api-service -n production -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
+        API_URL=$(kubectl get service book-mgmt-api-service -n development -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
         echo "::set-output name=api_url::$API_URL"
         echo "API URL: $API_URL"
 
@@ -156,10 +156,10 @@ jobs:
 
     - name: Deploy App on GKE
       run: |-
-        # sed -i -e 's/DOCKER_IMG_TAG/'${{ github.sha }}'/' ./app/kubernetes/production/book-mgmt-app-deploy.yaml
+        # sed -i -e 's/DOCKER_IMG_TAG/'${{ github.sha }}'/' ./app/kubernetes/development/book-mgmt-app-deploy.yaml
         # kustomize edit set image APP_DOCKER_IMG_TAG=$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_CLIENT:${{github.sha}}
-        sed -i -e "s|APP_DOCKER_IMG_TAG|${GAR_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_CLIENT}:${GITHUB_SHA}|g" ./app/kubernetes/production/book-mgmt-app-deploy.yaml
-        kubectl apply -f ./app/kubernetes/production/
+        sed -i -e "s|APP_DOCKER_IMG_TAG|${GAR_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_CLIENT}:${GITHUB_SHA}|g" ./app/kubernetes/development/book-mgmt-app-deploy.yaml
+        kubectl apply -f ./app/kubernetes/development/
       env:
         GAR_LOCATION: ${{ env.GAR_LOCATION }}
         PROJECT_ID: ${{ env.PROJECT_ID }}
