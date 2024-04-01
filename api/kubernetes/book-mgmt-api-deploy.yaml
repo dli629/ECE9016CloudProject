@@ -41,11 +41,11 @@ spec:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
-              - matchExpressions:
-                  - key: role
-                    operator: In
-                    values:
-                      - web
+            - matchExpressions:
+              - key: role
+                operator: In
+                values:
+                - web
         podAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
           - weight: 1
