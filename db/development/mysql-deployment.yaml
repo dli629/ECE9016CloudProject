@@ -5,7 +5,7 @@ metadata:
   labels:
     name: mysql-deploy
     app: mysql-gke-deployment
-  namespace: development
+  namespace: production
 spec:
   replicas: 1
   selector:
@@ -36,6 +36,8 @@ spec:
             - name: mysql-data
               mountPath: "/var/lib/mysql"
               subPath: "mysql"
+      nodeSelector:
+        role: db
       volumes:
         - name: mysql-initdb
           configMap:

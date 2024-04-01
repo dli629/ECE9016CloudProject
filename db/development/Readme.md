@@ -1,7 +1,5 @@
 # MySQL Kubernetes Configuration
 
-## Detailed explanation and usage of this repository is give in the medium article [link](https://medium.com/p/9abdd5d58b91/edit)
-
 ### While executing these commands make sure you are in the folder where files are present or change commands to include the file path.
 
 <b>1. Create persistent volume claim following command.</b>
