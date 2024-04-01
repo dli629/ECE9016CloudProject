@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: book-mgmt-app-deploy
+  labels:
+    # name: book-mgmt-app-deploy
+    app: book-management
+    component: app
+  namespace: development
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      # name: book-mgmt-app-pod
+      app: book-management
+      component: app
+  template:
+    metadata:
+      # name: book-mgmt-app-pod
+      labels:
+        # name: book-mgmt-app-pod
+        app: book-management
+        component: app
+    spec:
+      containers:
+        - name: book-management-app-image
+          image: APP_DOCKER_IMG_TAG
+          ports:
+            - containerPort: 80
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: role
+                operator: In
+                values:
+                - web
+        podAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app: book-management
+                  component: api
+              topologyKey: "kubernetes.io/hostname"
