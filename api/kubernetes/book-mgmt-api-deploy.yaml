@@ -38,14 +38,14 @@ spec:
           ports:
             - containerPort: 5000
       affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: role
-                    operator: In
-                    values:
-                      - web
+        # nodeAffinity:
+        #   requiredDuringSchedulingIgnoredDuringExecution:
+        #     nodeSelectorTerms:
+        #       - matchExpressions:
+        #           - key: role
+        #             operator: In
+        #             values:
+        #               - web
         podAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:
