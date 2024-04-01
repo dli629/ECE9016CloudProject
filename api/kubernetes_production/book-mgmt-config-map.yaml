@@ -5,7 +5,7 @@ metadata:
   labels:
     name: database-config
     app: book-management
-  namespace: development
+  namespace: production
 data:
   NODE_ENV: development
   MYSQL_HOST: 10.56.165.37

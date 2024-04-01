@@ -6,7 +6,7 @@ metadata:
     # name: book-mgmt-app-deploy
     app: book-management
     component: app
-  namespace: development
+  namespace: production
 spec:
   replicas: 2
   selector:
@@ -55,7 +55,7 @@ spec:
                   component: app
               topologyKey: "kubernetes.io/hostname"
 
-              
+
         # podAffinity:
         #   preferredDuringSchedulingIgnoredDuringExecution:
         #   - labelSelector:
