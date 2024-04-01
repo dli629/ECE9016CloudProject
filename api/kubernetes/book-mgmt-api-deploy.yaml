@@ -38,25 +38,25 @@ spec:
           ports:
             - containerPort: 5000
       affinity:
-        # nodeAffinity:
-        #   requiredDuringSchedulingIgnoredDuringExecution:
-        #     nodeSelectorTerms:
-        #       - matchExpressions:
-        #           - key: role
-        #             operator: In
-        #             values:
-        #               - web
-        podAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchLabels:
-                app: book-management
-                component: app
-            topologyKey: "kubernetes.io/hostname"
-        # podAntiAffinity:
-        #   requiredDuringSchedulingIgnoredDuringExecution:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: role
+                    operator: In
+                    values:
+                      - web
+        # podAffinity:
+        #   preferredDuringSchedulingIgnoredDuringExecution:
         #   - labelSelector:
         #       matchLabels:
         #         app: book-management
-        #         component: api
+        #         component: app
         #     topologyKey: "kubernetes.io/hostname"
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app: book-management
+                component: api
+            topologyKey: "kubernetes.io/hostname"
