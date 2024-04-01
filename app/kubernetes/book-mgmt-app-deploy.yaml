@@ -43,10 +43,10 @@ spec:
                 app: book-management
                 component: api
             topologyKey: "kubernetes.io/hostname"
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchLabels:
-                app: book-management
-                component: app
-            topologyKey: "kubernetes.io/hostname"
+        # podAntiAffinity:
+        #   requiredDuringSchedulingIgnoredDuringExecution:
+        #   - labelSelector:
+        #       matchLabels:
+        #         app: book-management
+        #         component: app
+        #     topologyKey: "kubernetes.io/hostname"
