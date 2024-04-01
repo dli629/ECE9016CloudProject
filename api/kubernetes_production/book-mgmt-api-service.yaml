@@ -5,12 +5,13 @@ metadata:
   labels:
     name: book-mgmt-api-service
     app: book-management
-  namespace: development
+  namespace: production
 spec:
   type: LoadBalancer
   selector:
-    name: book-mgmt-api-pod
+    # name: book-mgmt-api-pod
     app: book-management
+    component: api
   ports:
     - name: http
       port: 5000

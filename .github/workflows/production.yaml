@@ -1,0 +1,168 @@
+name: Docker build and Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
+  GAR_LOCATION: us-central1 
+  GKE_CLUSTER: my-gke-cluster
+  GKE_ZONE: us-central1
+  DEPLOYMENT_NAME_CLIENT: gke-client
+  DEPLOYMENT_NAME_SERVER: gke-server
+  REPOSITORY: samples
+  IMAGE_CLIENT: client
+  IMAGE_SERVER: server
+  CLIENT: ./app
+  SERVER: ./api
+  SITE_HOSTNAME: localhost
+
+
+jobs:
+  # create-image-and-push-to-dockerhub:
+  
+  #   name: Create Image and Push to Dockerhub
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: checkout
+  #       uses: actions/checkout@v3
+
+  #     # - name: Docker Login
+  #     #   uses: docker/login-action@v2
+  #     #   with:
+  #     #     username: ${{ secrets.DOCKER_USERNAME }}
+  #     #     password: ${{ secrets.DOCKER_TOKEN }}
+      
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v2
+
+  #     - name: Build and push API image
+  #       uses: docker/build-push-action@v4
+  #       with:
+  #         context: ./api
+  #         file: ./api/Dockerfile
+  #         push: true
+  #         tags: 9016/book-management-api:${{ github.sha }}
+  #         # tags: $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/server:$GITHUB_SHA
+      
+  #     - name: Build and push App image
+  #       uses: docker/build-push-action@v4
+  #       with:
+  #         context: ./app
+  #         file: ./app/Dockerfile
+  #         push: true
+  #         tags: 9016/book-management-app:${{ github.sha }}
+  #         # tags: $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/client:$GITHUB_SHA
+  #         build-args: REACT_APP_BASE_URL=${{ secrets.REACT_APP_BASE_URL }}
+  
+  setup-build-and-deploy:
+    # needs: [create-image-and-push-to-dockerhub]
+
+    name: Setup and Deploy
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    # - name: Authenticate to Google Cloud
+    #   uses: google-github-actions/auth@v1
+    #   with:
+    #     credentials_json: ${{ secrets.GKE_SA }}
+
+    # - name: Get GKE Credentials
+    #   uses: google-github-actions/get-gke-credentials@v1
+    #   with:
+    #     cluster_name: ${{ secrets.GKE_CLUSTER_NAME }}
+    #     location: ${{ secrets.GKE_CLUSTER_ZONE }}
+
+    - id: 'auth'
+      name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v2'
+      with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+    - name: Set up GKE credentials
+      uses: google-github-actions/get-gke-credentials@v2
+      with:
+        cluster_name: ${{ env.GKE_CLUSTER }}
+        location: ${{ env.GKE_ZONE }}
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    
+    # Docker auth configuration
+    - name: Docker auth configuration
+      run: gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://${{env.GAR_LOCATION}}-docker.pkg.dev
+
+    - name: Build and push API image to GAR
+      uses: docker/build-push-action@v4
+      with:
+        context: ./api
+        file: ./api/Dockerfile
+        push: true
+        tags: ${{env.GAR_LOCATION}}-docker.pkg.dev/${{env.PROJECT_ID}}/${{env.REPOSITORY}}/server:${{github.sha}}
+
+    # Set up kustomize
+    - name: Set up Kustomize
+      run: |-
+        curl -sfLo kustomize https://github.com/kubernetes-sigs/kustomize/releases/download/v3.1.0/kustomize_3.1.0_linux_amd64
+        chmod u+x kustomize
+        sudo mv kustomize /usr/local/bin/
+
+    - name: Deploy API on the GKE
+      run: |-
+        # sed -i -e 's/DOCKER_IMG_TAG/'${{ github.sha }}'/' ./api/kubernetes_production/book-mgmt-api-deploy.yaml
+        # kustomize edit set image API_DOCKER_IMG_TAG=$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_SERVER:${{github.sha}}
+        sed -i -e "s|API_DOCKER_IMG_TAG|${GAR_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_SERVER}:${GITHUB_SHA}|g" ./api/kubernetes_production/book-mgmt-api-deploy.yaml
+        kubectl apply -f ./api/kubernetes_production/
+        echo "API deployment initiated"
+      env:
+        GAR_LOCATION: ${{ env.GAR_LOCATION }}
+        PROJECT_ID: ${{ env.PROJECT_ID }}
+        REPOSITORY: ${{ env.REPOSITORY }}
+        IMAGE_CLIENT: ${{ env.IMAGE_CLIENT }}
+        GITHUB_SHA: ${{ github.sha }}
+
+    - name: List services
+      run: kubectl get services -n production
+
+    - name: Get API URL
+      id: get-api-url
+      run: |
+        # kubectl wait --for=condition=available --timeout=300s -n production deployment/book-mgmt-api-deploy
+        sleep 300
+        # get URL
+        API_URL=$(kubectl get service book-mgmt-api-service -n production -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
+        echo "::set-output name=api_url::$API_URL"
+        echo "API URL: $API_URL"
+
+    - name: Build and push App image to GAR
+      uses: docker/build-push-action@v4
+      with:
+        context: ./app
+        file: ./app/Dockerfile
+        push: true
+        tags: ${{env.GAR_LOCATION}}-docker.pkg.dev/${{env.PROJECT_ID}}/${{env.REPOSITORY}}/client:${{github.sha}}
+        build-args: REACT_APP_BASE_URL=${{ steps.get-api-url.outputs.api_url }}
+
+    - name: Deploy App on GKE
+      run: |-
+        # sed -i -e 's/DOCKER_IMG_TAG/'${{ github.sha }}'/' ./app/kubernetes_production/book-mgmt-app-deploy.yaml
+        # kustomize edit set image APP_DOCKER_IMG_TAG=$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_CLIENT:${{github.sha}}
+        sed -i -e "s|APP_DOCKER_IMG_TAG|${GAR_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_CLIENT}:${GITHUB_SHA}|g" ./app/kubernetes_production/book-mgmt-app-deploy.yaml
+        kubectl apply -f ./app/kubernetes_production/
+      env:
+        GAR_LOCATION: ${{ env.GAR_LOCATION }}
+        PROJECT_ID: ${{ env.PROJECT_ID }}
+        REPOSITORY: ${{ env.REPOSITORY }}
+        IMAGE_CLIENT: ${{ env.IMAGE_CLIENT }}
+        GITHUB_SHA: ${{ github.sha }}
