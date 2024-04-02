@@ -2,7 +2,7 @@
 
 resource "google_container_cluster" "primary" {
   name     = var.gke_cluster_name
-  location = "us-central1"
+  location = "us-central1-a"
   deletion_protection = false
 
   # We can't create a cluster with no node pool defined, but we want to only use
@@ -28,10 +28,5 @@ resource "google_container_node_pool" "primary_preemptible_nodes" {
     oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform"
     ]
-     # Add label to node
-    labels = {
-      role = "db"
-      role = "web"
-    }
   }
 }
