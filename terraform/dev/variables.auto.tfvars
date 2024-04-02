@@ -1,4 +1,4 @@
-gcp_credentials = "ece9016-417801-1c0ba29a7c92.json" // TODO: replace with your own key file
+gcp_credentials = "key.json" // TODO: replace with your own key file
 gcp_project_id = "ece9016-417801" // TODO: replace with your own project id
 gcp_region = "us-central1" //TODO: default to use "us-central1", replace with your prefer.
 gke_cluster_name = "my-gke-cluster" // TODO: replace with your cluster name
