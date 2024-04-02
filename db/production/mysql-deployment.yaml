@@ -36,6 +36,8 @@ spec:
             - name: mysql-data
               mountPath: "/var/lib/mysql"
               subPath: "mysql"
+      nodeSelector:
+        role: db
       volumes:
         - name: mysql-initdb
           configMap:
