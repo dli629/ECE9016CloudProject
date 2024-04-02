@@ -1,0 +1,12 @@
+gcp_credentials = "ece9016-417801-1c0ba29a7c92.json" // TODO: replace with your own key file
+gcp_project_id = "ece9016-417801" // TODO: replace with your own project id
+gcp_region = "us-central1" //TODO: default to use "us-central1", replace with your prefer.
+gke_cluster_name = "my-gke-cluster" // TODO: replace with your cluster name
+gke_node_name = "my-node"
+gke_node_type = "g1-small"
+gke_zones = ["us-central1-a"] #, "us-central1-b", "us-central1-f" // TODO: single node for development
+gke_regional = false
+gke_network = "default"
+gke_subnetwork = "default"
+gke_default_nodepool_name = "my-node-pool"
+gke_service_account_name = "terraform-dev@ece9016-417801.iam.gserviceaccount.com" // TODO:  service account name
