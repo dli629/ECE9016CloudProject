@@ -31,3 +31,9 @@ kubeclt create -f mysql-deployment.yaml
 ```
 kubeclt create -f mysql-service.yaml
 ```
+<b>6. Connect DB with password: winter</b>
+
+```
+kubectl exec --stdin --tty pod/mysql-deploy-596f574d57-ksz96 -- /bin/bash
+mysql -p
+```

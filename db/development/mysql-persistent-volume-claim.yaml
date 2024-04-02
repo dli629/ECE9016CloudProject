@@ -5,13 +5,13 @@ metadata:
   labels:
     name: mysql-data-store
     app: mysql-gke-deployment
-  namespace: production
+  namespace: development
 spec:
   resources:
     requests:
-      storage: 1Gi
+      storage: 0.5Gi
     limits:
-      storage: 1Gi
+      storage: 0.5Gi
   accessModes:
     - ReadWriteOnce
   storageClassName: standard-rwo
